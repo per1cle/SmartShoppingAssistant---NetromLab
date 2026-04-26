@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="SmartShoppingAssistant.Api/SmartShoppingAssistant.Api.csproj" />
+  <Project Path="SmartShoppingAssistant.BussinesLogic/SmartShoppingAssistant.BussinesLogic.csproj" Id="0d4ccfe5-a6d3-42a0-8967-ee8797306963" />
+  <Project Path="SmartShoppingAssistant.DataAccess/SmartShoppingAssistant.DataAccess.csproj" />
+</Solution>
