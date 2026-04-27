@@ -13,26 +13,16 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                var product = await productService.GetByIdAsync(id);
+                var product = await productService.GetProductByIdAsync(id);
                 return Ok(product); ;
             }
-            catch (Exception ex)
+            catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
-        }
-
-        [HttpDelete("{id}")]
-        public async Task<ActionResult> Delete(int id)
-        {
-            try
+            catch(Exception ex)   
             {
-                await productService.DeleteAsync(id);
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                return NotFound(ex.Message);
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
@@ -41,12 +31,12 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                var products = await productService.GetAllAsync();
+                var products = await productService.GetAllProductsAsync();
                 return Ok(products);
             }
             catch (Exception ex)
             {
-                return NotFound(ex.Message);    //bad request?
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
 
         }
@@ -56,12 +46,12 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                var product = await productService.AddAsync(productCreateDTO);
+                var product = await productService.AddProductAsync(productCreateDTO);
                 return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
@@ -70,13 +60,34 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                productUpdateDTO.Id = id;
-                var updatedProduct = await productService.UpdateAsync(productUpdateDTO);
+                var updatedProduct = await productService.UpdateProductAsync(id, productUpdateDTO);
                 return Ok(updatedProduct);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            try
+            {
+                await productService.DeleteProductAsync(id);
+                return NoContent();
+            }
+            catch (KeyNotFoundException ex)
+            {
                 return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
     }

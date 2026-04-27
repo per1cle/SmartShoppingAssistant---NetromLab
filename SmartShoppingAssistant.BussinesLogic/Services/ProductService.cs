@@ -7,39 +7,22 @@ namespace SmartShoppingAssistant.BussinesLogic.Services
 {
     public class ProductService(IRepository<Product> productRepository) : IProductService
     {
-        public async Task<ProductGetDTO> GetByIdAsync(int id)
+        public async Task<ProductGetDTO> GetProductByIdAsync(int id)
         {
-            var product = await productRepository.GetByIdAsync(id);
+            var product = await productRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Product with id {id} not found.");
 
-            return new ProductGetDTO
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                ImageUrl = product.ImageUrl,
-                Price = product.Price
-            };
+            return MapToProductGetDTO(product);
         }
 
-        public async Task DeleteAsync(int id)
-        {
-            await productRepository.DeleteAsync(id);
-        }
-
-        public async Task<List<ProductGetDTO>> GetAllAsync()
+        public async Task<List<ProductGetDTO>> GetAllProductsAsync()
         {
             var products = await productRepository.GetAllAsync();
-            return products.Select(product => new ProductGetDTO
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Description = product.Description,
-                ImageUrl = product.ImageUrl,
-                Price = product.Price
-            }).ToList();
+            
+            return products.Select(MapToProductGetDTO).ToList();
         }
 
-        public async Task<ProductGetDTO> AddAsync(ProductCreateDTO productCreateDTO)
+        public async Task<ProductGetDTO> AddProductAsync(ProductCreateDTO productCreateDTO)
         {
             var product = new Product
             {
@@ -48,35 +31,50 @@ namespace SmartShoppingAssistant.BussinesLogic.Services
                 ImageUrl = productCreateDTO.ImageUrl,
                 Price = productCreateDTO.Price
             };
+
             var addedProduct = await productRepository.AddAsync(product);
-            return new ProductGetDTO
-            {
-                Id = addedProduct.Id,
-                Name = addedProduct.Name,
-                Description = addedProduct.Description,
-                ImageUrl = addedProduct.ImageUrl,
-                Price = addedProduct.Price
-            };
+            
+            return MapToProductGetDTO(addedProduct);
         }
 
-        public async Task<ProductGetDTO> UpdateAsync(ProductUpdateDTO productUpdateDTO)
+        public async Task<ProductGetDTO> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDTO)
         {
-            var existingProduct = await productRepository.GetByIdAsync(productUpdateDTO.Id);
+            var existingProduct = await productRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Product with id {id} not found.");
 
-            existingProduct.Name = productUpdateDTO.Name;
-            existingProduct.Description = productUpdateDTO.Description;
-            existingProduct.ImageUrl = productUpdateDTO.ImageUrl;
-            existingProduct.Price = productUpdateDTO.Price;
+            if (productUpdateDTO.Name != null)
+                existingProduct.Name = productUpdateDTO.Name;
+
+            if (productUpdateDTO.Description != null)
+                existingProduct.Description = productUpdateDTO.Description;
+
+            if (productUpdateDTO.ImageUrl != null)
+                existingProduct.ImageUrl = productUpdateDTO.ImageUrl;
+
+            if (productUpdateDTO.Price != null)
+                existingProduct.Price = productUpdateDTO.Price.Value;
 
             var updatedProduct = await productRepository.UpdateAsync(existingProduct);
 
+            return MapToProductGetDTO(updatedProduct);
+        }
+
+        public async Task DeleteProductAsync(int id)
+        {
+            var product = await productRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Product with id {id} not found.");
+            await productRepository.DeleteAsync(product);
+        }
+
+        private static ProductGetDTO MapToProductGetDTO(Product product)
+        {
             return new ProductGetDTO
             {
-                Id = updatedProduct.Id,
-                Name = updatedProduct.Name,
-                Description = updatedProduct.Description,
-                ImageUrl = updatedProduct.ImageUrl,
-                Price = updatedProduct.Price
+                Id = product.Id,
+                Name = product.Name,
+                Description = product.Description,
+                ImageUrl = product.ImageUrl,
+                Price = product.Price
             };
         }
     }

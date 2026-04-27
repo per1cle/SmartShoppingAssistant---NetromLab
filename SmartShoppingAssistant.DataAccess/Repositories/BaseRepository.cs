@@ -6,83 +6,35 @@ namespace SmartShoppingAssistant.DataAccess.Repositories
 {
     public class BaseRepository<TEntity>(SmartShoppingAssistantDbContext context) : IRepository<TEntity> where TEntity : class
     {
-        public async Task<TEntity> GetByIdAsync(int id)
+        public async Task<TEntity?> GetByIdAsync(int id)
         {
-            try
-            {
-                var entity = await context.Set<TEntity>().FindAsync(id);
-
-                if (entity == null)
-                {
-                    throw new Exception($"Entity with id {id} not found");
-                }
-
-                return entity;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error retrieving entity with id {id}: {ex.Message}", ex);
-            }
-        }
-
-        public async Task<TEntity> AddAsync(TEntity entity)
-        {
-            try
-            {
-                await context.Set<TEntity>().AddAsync(entity);
-                await context.SaveChangesAsync();
-                return entity;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Error adding entity: {ex.Message}", ex);
-            }
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            try
-            {
-                var entity = await context.Set<TEntity>().FindAsync(id);
-
-                if (entity == null)
-                {
-                    throw new Exception($"Entity with id {id} not found");
-                }
-
-                context.Set<TEntity>().Remove(entity);
-                await context.SaveChangesAsync();
-            }
-            catch(Exception ex)
-            {
-                throw new Exception($"Error deleting entity with id {id}: {ex.Message}", ex);
-            }
+            return await context.Set<TEntity>().FindAsync(id);
         }
 
         public async Task<List<TEntity>> GetAllAsync()
         {
-            try
-            {
-                return await context.Set<TEntity>().ToListAsync();
-            } 
-            catch (Exception ex)
-            {
-                throw new Exception($"Error retrieving all entities: {ex.Message}", ex);
-            }
+            return await context.Set<TEntity>().ToListAsync();
+        }
+
+        public async Task<TEntity> AddAsync(TEntity entity)
+        {
+            
+            await context.Set<TEntity>().AddAsync(entity);
+            await context.SaveChangesAsync();
+            return entity;
         }
 
         public async Task<TEntity> UpdateAsync(TEntity entity)
         {
-            try
-            {
-                context.Set<TEntity>().Update(entity);
-                await context.SaveChangesAsync();
-                return entity;
-            }
-            catch(Exception ex)
-            {
-                throw new Exception($"Error updating entity: {ex.Message}", ex);
-            }
+            context.Set<TEntity>().Update(entity);
+            await context.SaveChangesAsync();
+            return entity;
+        }
+
+        public async Task DeleteAsync(TEntity entity)
+        {
+            context.Set<TEntity>().Remove(entity);
+            await context.SaveChangesAsync();
         }
     }
 }

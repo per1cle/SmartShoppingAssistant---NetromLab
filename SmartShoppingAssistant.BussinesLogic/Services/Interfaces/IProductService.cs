@@ -4,10 +4,10 @@ namespace SmartShoppingAssistant.BussinesLogic.Services.Interfaces
 {
     public interface IProductService
     {
-        Task<ProductGetDTO> GetByIdAsync(int id);
-        Task DeleteAsync(int id);
-        Task<List<ProductGetDTO>> GetAllAsync();
-        Task<ProductGetDTO> AddAsync(ProductCreateDTO productCreateDTO);
-        Task<ProductGetDTO> UpdateAsync(ProductUpdateDTO productUpdateDTO);
+        Task<ProductGetDTO> GetProductByIdAsync(int id);
+        Task DeleteProductAsync(int id);
+        Task<List<ProductGetDTO>> GetAllProductsAsync();
+        Task<ProductGetDTO> AddProductAsync(ProductCreateDTO productCreateDTO);
+        Task<ProductGetDTO> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDTO);
     }
 }
