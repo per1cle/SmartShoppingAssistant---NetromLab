@@ -1,38 +1,38 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using SmartShoppingAssistant.BussinesLogic.DTOs.ProductDTOs;
+using SmartShoppingAssistant.BussinesLogic.DTOs.CategoryDTOs;
 using SmartShoppingAssistant.BussinesLogic.Services.Interfaces;
 
 namespace SmartShoppingAssistant.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ProductsController(IProductService productService) : ControllerBase
+    public class CategoriesController(ICategoryService categoryService) : ControllerBase
     {
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProductGetDTO>> GetById(int id)
+        public async Task<ActionResult<CategoryGetDTO>> GetById(int id)
         {
             try
             {
-                var product = await productService.GetProductByIdAsync(id);
-                return Ok(product); ;
+                var category = await categoryService.GetCategoryByIdAsync(id);
+                return Ok(category);
             }
             catch (KeyNotFoundException ex)
             {
                 return NotFound(ex.Message);
             }
-            catch(Exception ex)   
+            catch (Exception ex)
             {
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<ProductGetDTO>>> GetAll([FromQuery] int? categoryId)
+        public async Task<ActionResult<List<CategoryGetDTO>>> GetAll()
         {
             try
             {
-                var products = await productService.GetAllProductsAsync(categoryId);
-                return Ok(products);
+                var categories = await categoryService.GetAllCategoriesAsync();
+                return Ok(categories);
             }
             catch (Exception ex)
             {
@@ -42,12 +42,12 @@ namespace SmartShoppingAssistant.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<ProductGetDTO>> Add(ProductCreateDTO productCreateDTO)
+        public async Task<ActionResult<CategoryGetDTO>> Add(CategoryCreateDTO categoryCreateDTO)
         {
             try
             {
-                var product = await productService.AddProductAsync(productCreateDTO);
-                return CreatedAtAction(nameof(GetById), new { id = product.Id }, product);
+                var category = await categoryService.AddCategoryAsync(categoryCreateDTO);
+                return CreatedAtAction(nameof(GetById), new { id = category.Id }, category);
             }
             catch (Exception ex)
             {
@@ -56,12 +56,12 @@ namespace SmartShoppingAssistant.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<ProductGetDTO>> Update(int id, ProductUpdateDTO productUpdateDTO)
+        public async Task<ActionResult<CategoryGetDTO>> Update(int id, CategoryUpdateDTO categoryUpdateDTO)
         {
             try
             {
-                var updatedProduct = await productService.UpdateProductAsync(id, productUpdateDTO);
-                return Ok(updatedProduct);
+                var updatedCategory = await categoryService.UpdateCategoryAsync(id, categoryUpdateDTO);
+                return Ok(updatedCategory);
             }
             catch (KeyNotFoundException ex)
             {
@@ -78,7 +78,7 @@ namespace SmartShoppingAssistant.Api.Controllers
         {
             try
             {
-                await productService.DeleteProductAsync(id);
+                await categoryService.DeleteCategoryAsync(id);
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
