@@ -5,11 +5,11 @@ using SmartShoppingAssistant.DataAccess.Repositories;
 
 namespace SmartShoppingAssistant.BussinesLogic.Services
 {
-    public class ProductService(IProductRepository productRepository, IRepository<Category> categoryRepository) : IProductService
+    public class ProductService(IProductRepository productRepository, ICategoryRepository categoryRepository) : IProductService
     {
         public async Task<ProductGetDTO> GetProductByIdAsync(int id)
         {
-            var product = await productRepository.GetByIdAsync(id)
+            var product = await productRepository.GetByIdWithCategoriesAsync(id)
                 ?? throw new KeyNotFoundException($"Product with id {id} not found.");
 
             return MapToProductGetDTO(product);
@@ -17,7 +17,7 @@ namespace SmartShoppingAssistant.BussinesLogic.Services
 
         public async Task<List<ProductGetDTO>> GetAllProductsAsync(int? categoryId = null)
         {
-            var products = await productRepository.GetAllProductsWithCategory(categoryId);
+            var products = await productRepository.GetAllAsync(categoryId);
             
             return products.Select(MapToProductGetDTO).ToList();
         }
@@ -49,38 +49,35 @@ namespace SmartShoppingAssistant.BussinesLogic.Services
 
         public async Task<ProductGetDTO> UpdateProductAsync(int id, ProductUpdateDTO productUpdateDTO)
         {
-            var product = await productRepository.GetProductWithCategory(id)
+            var product = await productRepository.GetByIdWithCategoriesAsync(id)
                 ?? throw new KeyNotFoundException($"Product with id {id} not found.");
 
-            product.Name = productUpdateDTO.Name ?? product.Name;
-            product.Description = productUpdateDTO.Description ?? product.Description;
-            product.ImageUrl = productUpdateDTO.ImageUrl ?? product.ImageUrl;
-            product.Price = productUpdateDTO.Price ?? product.Price;
+            product.Name = productUpdateDTO.Name;
+            product.Description = productUpdateDTO.Description;
+            product.ImageUrl = productUpdateDTO.ImageUrl;
+            product.Price = productUpdateDTO.Price;
 
             if (productUpdateDTO.CategoryIds != null)
             {
                 var currentCategoryIds = product.Categories.Select(c => c.Id).ToList();
 
-                var toAddCategories = productUpdateDTO.CategoryIds.Except(currentCategoryIds).ToList();
-                var toRemoveCategories = currentCategoryIds.Except(productUpdateDTO.CategoryIds).ToList();
+                var toAddCategoriesIds = productUpdateDTO.CategoryIds.Except(currentCategoryIds).ToList();
+                var toRemoveCategoriesIds = currentCategoryIds.Except(productUpdateDTO.CategoryIds).ToList();
 
-                foreach (var categoryId in toAddCategories)
+                var categoriesToRemove = product.Categories.Where(c => toRemoveCategoriesIds.Contains(c.Id)).ToList();
+
+                foreach (var category in categoriesToRemove)
                 {
-                    var category = await categoryRepository.GetByIdAsync(categoryId);
-                    if (category == null)
-                    {
-                        throw new KeyNotFoundException($"Category with id {categoryId} not found.");
-                    }
-                    product.Categories.Add(category);
+                    product.Categories.Remove(category);      
                 }
 
-                foreach (var categoryId in toRemoveCategories)
+                if(toAddCategoriesIds.Any())
                 {
-                    var categoryToRemove = product.Categories.FirstOrDefault(c => c.Id == categoryId);
-                    if (categoryToRemove != null)
+                    var categoriesToAdd = await categoryRepository.GetByIdsAsync(toAddCategoriesIds);
+                    foreach (var category in categoriesToAdd)
                     {
-                        product.Categories.Remove(categoryToRemove);
-                    }      
+                        product.Categories.Add(category);
+                    }
                 }
             }
 
@@ -88,12 +85,23 @@ namespace SmartShoppingAssistant.BussinesLogic.Services
 
             return MapToProductGetDTO(updatedProduct);
         }
-
         public async Task DeleteProductAsync(int id)
         {
             var product = await productRepository.GetByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Product with id {id} not found.");
             await productRepository.DeleteAsync(product);
+        }
+
+        public async Task<List<ProductGetDTO>> SearchAsync(string query)
+        {
+            var products = await productRepository.SearchAsync(query);
+            return products.Select(MapToProductGetDTO).ToList();
+        }
+
+        public async Task<List<ProductGetDTO>> GetByCategoryAsync(int categoryId)
+        {
+            var products = await productRepository.GetByCategoryAsync(categoryId);
+            return products.Select(MapToProductGetDTO).ToList();
         }
 
         private static ProductGetDTO MapToProductGetDTO(Product product)

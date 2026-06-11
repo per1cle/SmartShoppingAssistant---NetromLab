@@ -4,7 +4,9 @@ namespace SmartShoppingAssistant.DataAccess.Repositories
 {
     public interface IProductRepository: IRepository<Product>
     {
-        Task<Product?> GetProductWithCategory(int id);
-        Task<List<Product>> GetAllProductsWithCategory(int? categoryId = null);
+        Task<List<Product>> GetAllAsync(int? categoryId);
+        Task<Product?> GetByIdWithCategoriesAsync(int id);
+        Task<List<Product>> SearchAsync(string query);
+        Task<List<Product>> GetByCategoryAsync(int categoryId);
     }
 }

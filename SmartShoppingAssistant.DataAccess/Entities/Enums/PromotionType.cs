@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace SmartShoppingAssistant.DataAccess.Entities.Enums
+﻿namespace SmartShoppingAssistant.DataAccess.Entities.Enums
 {
     public enum PromotionType       // What triggers the promo?
     {

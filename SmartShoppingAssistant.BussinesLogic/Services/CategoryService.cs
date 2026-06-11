@@ -40,10 +40,8 @@ namespace SmartShoppingAssistant.BussinesLogic.Services
             var existingCategory = await categoryRepository.GetByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Category with id {id} not found.");
 
-            if (categoryUpdateDTO.Name != null)
-                existingCategory.Name = categoryUpdateDTO.Name;
-            if (categoryUpdateDTO.Description != null)
-                existingCategory.Description = categoryUpdateDTO.Description;
+            existingCategory.Name = categoryUpdateDTO.Name;
+            existingCategory.Description = categoryUpdateDTO.Description;
 
             var updatedCategory = await categoryRepository.UpdateAsync(existingCategory);
 

@@ -102,5 +102,12 @@ namespace SmartShoppingAssistant.Api.Controllers
                 return StatusCode(500, $"An error occurred: {ex.Message}");
             }
         }
+
+        [HttpPost("analyze")]
+        public async Task<ActionResult> AnalyzeCart()
+        { 
+            var analysisResponse = await cartService.AnalyzeCartAsync();
+            return Ok(analysisResponse);
+        }
     }
 }

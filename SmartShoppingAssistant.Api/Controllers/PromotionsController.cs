@@ -73,6 +73,24 @@ namespace SmartShoppingAssistant.Api.Controllers
             }
         }
 
+        [HttpPatch("{id}/status")]
+        public async Task<ActionResult<PromotionGetDTO>> UpdateStatus(int id, [FromQuery] bool isActive)
+        {
+            try
+            {
+                var updatedPromotion = await promotionService.UpdatePromotionStatusAsync(id, isActive);
+                return Ok(updatedPromotion);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"An error occurred: {ex.Message}");
+            }
+        }
+
         [HttpDelete("{id}")]
         public async Task<ActionResult> Delete(int id)
         {

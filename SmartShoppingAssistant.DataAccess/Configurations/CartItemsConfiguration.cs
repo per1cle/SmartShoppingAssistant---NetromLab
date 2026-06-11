@@ -4,7 +4,7 @@ using SmartShoppingAssistant.DataAccess.Entities;
 
 namespace SmartShoppingAssistant.DataAccess.Configurations
 {
-    public class CartItemsConfiguration
+    public class CartItemsConfiguration : IEntityTypeConfiguration<CartItems>
     {
         public void Configure(EntityTypeBuilder<CartItems> builder)
         {

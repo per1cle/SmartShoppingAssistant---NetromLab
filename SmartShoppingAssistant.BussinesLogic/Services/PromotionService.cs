@@ -5,7 +5,7 @@ using SmartShoppingAssistant.DataAccess.Repositories;
 
 namespace SmartShoppingAssistant.BussinesLogic.Services
 {
-    public class PromotionService(IRepository<Promotion> promotionRepository, IRepository<Product> productRepository, IRepository<Category> categoryRepository) : IPromotionService
+    public class PromotionService(IPromotionRepository promotionRepository, IRepository<Product> productRepository, IRepository<Category> categoryRepository) : IPromotionService
     {
         public async Task<PromotionGetDTO> GetPromotionByIdAsync(int id)
         {
@@ -80,23 +80,37 @@ namespace SmartShoppingAssistant.BussinesLogic.Services
                 promotion.CategoryId = promotionUpdateDTO.CategoryId ?? promotion.CategoryId;
             }
 
-            promotion.Name = promotionUpdateDTO.Name ?? promotion.Name;
-            promotion.Type = promotionUpdateDTO.Type ?? promotion.Type;
-            promotion.Threshold = promotionUpdateDTO.Threshold ?? promotion.Threshold;
-            promotion.Reward = promotionUpdateDTO.Reward ?? promotion.Reward;
-            promotion.RewardValue = promotionUpdateDTO.RewardValue ?? promotion.RewardValue;
-            promotion.IsActive = promotionUpdateDTO.IsActive ?? promotion.IsActive;
+            promotion.Name = promotionUpdateDTO.Name;
+            promotion.Type = promotionUpdateDTO.Type;
+            promotion.Threshold = promotionUpdateDTO.Threshold;
+            promotion.Reward = promotionUpdateDTO.Reward;
+            promotion.RewardValue = promotionUpdateDTO.RewardValue;
+            promotion.IsActive = promotionUpdateDTO.IsActive; 
 
             var updatedPromotion = await promotionRepository.UpdateAsync(promotion);
 
             return MapToPromotionGetDTO(updatedPromotion);
         }
 
+        public async Task<PromotionGetDTO> UpdatePromotionStatusAsync(int id, bool status)
+        {
+            var promotion = await promotionRepository.GetByIdAsync(id)
+                ?? throw new KeyNotFoundException($"Promotion with id {id} not found.");
+            promotion.IsActive = status;
+            var updatedPromotion = await promotionRepository.UpdateAsync(promotion);
+            return MapToPromotionGetDTO(updatedPromotion);
+        }
         public async Task DeletePromotionAsync(int id)
         {
             var promotion = await promotionRepository.GetByIdAsync(id)
                 ?? throw new KeyNotFoundException($"Promotion with id {id} not found.");
             await promotionRepository.DeleteAsync(promotion);
+        }
+
+        public async Task<List<PromotionGetDTO>> GetForProductAsync(int productId)
+        {
+            var promotions = await promotionRepository.GetForProductAsync(productId);
+            return promotions.Select(MapToPromotionGetDTO).ToList();
         }
 
         private static PromotionGetDTO MapToPromotionGetDTO(Promotion promotion)

@@ -16,8 +16,8 @@ namespace SmartShoppingAssistant.DataAccess.Configurations
             builder.Property(c => c.Description).IsRequired().HasMaxLength(500);
 
             builder.HasMany(c => c.Products)
-                .WithMany(p => p.Categories);
-
+                .WithMany(p => p.Categories)
+                .UsingEntity("ProductCategories");
 
         }
     }

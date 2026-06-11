@@ -1,12 +1,11 @@
-﻿using System.Linq.Expressions;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace SmartShoppingAssistant.DataAccess.Repositories
 {
     public class BaseRepository<TEntity>(SmartShoppingAssistantDbContext context) : IRepository<TEntity> where TEntity : class
     {
-        public async Task<TEntity?> GetByIdAsync(int id)
+        public IQueryable<TEntity> GetAllAsQueryable() => context.Set<TEntity>().AsQueryable();
+        public virtual async Task<TEntity?> GetByIdAsync(int id)
         {
             return await context.Set<TEntity>().FindAsync(id);
         }
